@@ -18,7 +18,7 @@ HEIGHT = 720
 WIDTH = 1280  # 16:9 format
 BACKGROUND = (247, 247, 247)
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-FONT = pygame.font.Font("visitor.ttf",30)
+FONT = pygame.font.Font("font/visitor.ttf",30)
 
 ############### LOADING IMAGES ###########################
 
