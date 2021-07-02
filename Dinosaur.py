@@ -1,5 +1,6 @@
 from pygame import *
 import os
+from random import randint
 
 RUNNING_DINO = [image.load(os.path.join("img/Dino/DinoRun1.png")),
                 image.load(os.path.join("img/Dino/DinoRun2.png"))]
@@ -19,6 +20,7 @@ class Dinosaur:
         self.step = 0
         self.actual_y = self.Y  # At the beginning , the dinosaur is at the running height
         self.jumping_speed = 1
+        self.color = (randint(75,255),randint(75,255),randint(75,255))
 
         self.run_img = RUNNING_DINO
         self.duck_img = DUCKING_DINO
@@ -33,7 +35,7 @@ class Dinosaur:
 
     def update(self, input):
 
-        self.hitbox = self.image.get_rect()
+        self.hitbox = Rect(self.X,self.actual_y,self.image.get_width(),self.image.get_height())
 
         if self.is_ducking:
             self.duck()
@@ -72,10 +74,13 @@ class Dinosaur:
         self.image = self.jump_img
         if self.is_jumping:
             self.actual_y -= self.jumping_speed * 30
-            self.jumping_speed -= 0.1
+            self.jumping_speed -= 0.075
         if self.jumping_speed < - 1:
             self.jumping_speed = 1
             self.is_jumping = False
 
-    def draw_image(self, screen):
+    def draw_image(self, screen,obstacles):
         screen.blit(self.image, (self.X, self.actual_y))
+        draw.rect(screen,self.color,self.hitbox,2)
+        for obstacle in obstacles:
+            draw.line(screen, self.color, (self.hitbox.x + 54, self.hitbox.y + 12), obstacle.hitbox.center, 2)
