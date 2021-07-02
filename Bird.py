@@ -7,7 +7,7 @@ import os
 BIRDS = [pygame.image.load(os.path.join("img/Bird/Bird1.png")),
          pygame.image.load(os.path.join("img/Bird/Bird2.png"))]
 
-HEIGHT = [340,290,235]
+HEIGHT = [360,300,235]
 
 class Bird(Obstacles):
 

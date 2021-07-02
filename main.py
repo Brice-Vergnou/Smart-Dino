@@ -28,14 +28,15 @@ FONT = pygame.font.Font("font/visitor.ttf", 30)
 ############ FUNCTIONS     ##############################
 
 
-def update_obstacle(type_of_obstacle,obstacle):
+def update_obstacle(type_of_obstacle, obstacle):
     obstacle.update(speed)
     if not type_of_obstacle:
         obstacle.animate()
     obstacle.draw(SCREEN)
 
-def create_obstacle(type_of_obstacle,obstacle):
-    if obstacle.X <= randint(100,340):  # When the bird is near the border , but at a random place , another appears
+
+def create_obstacle(type_of_obstacle, obstacle):
+    if obstacle.X <= randint(100, 340):  # When the bird is near the border , but at a random place , another appears
 
         list_old_types.append(type_of_obstacle)
         list_types.remove(type_of_obstacle)
@@ -51,29 +52,29 @@ def create_obstacle(type_of_obstacle,obstacle):
             list_obstacles.append(Bird())
         list_types.append(type_of_obstacle)
         for g in genomes:
-            g.fitness += 0.5
+            g.fitness += 5
 
-def distance(a,b):
+
+def distance(a, b):
     x = a[0] - b[0]
     y = a[1] - b[1]
-    return (x**2+y**2)**0.5
+    return (x ** 2 + y ** 2) ** 0.5
+
 
 def statistics():
     text_1 = FONT.render(f'Dinosaurs Alive:  {str(len(dinos))}', True, (0, 0, 0))
     text_2 = FONT.render(f'Generation:  {dinosaurs.generation + 1}', True, (0, 0, 0))
-    text_3 = FONT.render(f'Game Speed:  {str(speed)}', True, (0, 0, 0))
 
     SCREEN.blit(text_1, (50, 550))
     SCREEN.blit(text_2, (50, 600))
-    SCREEN.blit(text_3, (50, 650))
 
 
 ############ MAIN FUNCTION ###############################
 
 
-def eval(ge,conf):
+def eval(ge, conf):
     ######  INIT GAME  ###########
-    global speed , SCREEN , list_obstacles , list_types , list_old_types , list_old_obstacles , genomes , neural_net , dinos
+    global speed, SCREEN, list_obstacles, list_types, list_old_types, list_old_obstacles, genomes, neural_net, dinos
     RUNNING = True
     points = 0
     type_of_obstacle = randint(0, 1)  # 0 = Bird , 1 = Cactus
@@ -83,7 +84,6 @@ def eval(ge,conf):
     pygame.display.set_caption("Smart Dino")
     pygame.display.flip()
     speed = 12
-
 
     ##################### CREATE LISTS ########################
     list_types = []
@@ -96,11 +96,11 @@ def eval(ge,conf):
     dinos = []
 
     # Add dinos
-    for i , genome_tuple in enumerate(ge):
+    for i, genome_tuple in enumerate(ge):
         genome = genome_tuple[1]
         dinos.append(Dinosaur())
         genomes.append(genome)
-        neural_net.append(neat.nn.FeedForwardNetwork.create(genome,conf))
+        neural_net.append(neat.nn.FeedForwardNetwork.create(genome, conf))
         genome.fitness = 0
 
     # Add obstacle
@@ -108,8 +108,6 @@ def eval(ge,conf):
         list_obstacles.append(Cactus())
     else:
         list_obstacles.append(Bird())
-
-
 
     while RUNNING:
         if len(dinos) == 0:
@@ -131,7 +129,7 @@ def eval(ge,conf):
 
         for dino in dinos:
             dino.update(input)
-            dino.draw_image(SCREEN,list_obstacles)
+            dino.draw_image(SCREEN, list_obstacles)
 
         # To update the obstacle and maybe change it
         for i in range(len(list_obstacles)):
@@ -139,7 +137,7 @@ def eval(ge,conf):
             create_obstacle(list_types[i], list_obstacles[i])
             for j, dino in enumerate(dinos):
                 if dino.hitbox.colliderect(list_obstacles[i].hitbox):
-                    genomes[j].fitness -= 1     # If collision , decrease the fitness because it's bad and remove it
+                    genomes[j].fitness -= 1  # If collision , decrease the fitness because it's bad and remove it
                     dinos.pop(j)
                     genomes.pop(j)
                     neural_net.pop(j)
@@ -149,43 +147,39 @@ def eval(ge,conf):
             update_obstacle(list_old_types[i], list_old_obstacles[i])
             for j, dino in enumerate(dinos):
                 if dino.hitbox.colliderect(list_old_obstacles[i].hitbox):
-                    genomes[j].fitness -= 5     # If collision , decrease the fitness because it's bad and remove it
+                    genomes[j].fitness -= 5  # If collision , decrease the fitness because it's bad and remove it
                     dinos.pop(j)
                     genomes.pop(j)
                     neural_net.pop(j)
-
-        # Add a bit of fitness to the dinos still alive
-        for g in genomes:
-            g.fitness += 0.001 # Not too much because they may land on the obstacle later  and we dont want that
+                else:
+                    genomes[j].fitness += 0.1
 
         cloud.update(speed)
         cloud.draw(SCREEN)
         if cloud.X <= -100:  # When the cloud is gone , another appears
             cloud = Cloud()
 
-
-        for i , dino in enumerate(dinos):
+        for i, dino in enumerate(dinos):
             all_obstacles = list_obstacles + list_old_obstacles
             all_types = list_types + list_old_types
-            for j , obstacle in enumerate(all_obstacles):
+            for j, obstacle in enumerate(all_obstacles):
                 """ The inputs are :
                         - The y position of the dino
                         - The distance between the dino and the obstacle
                         - The y distance between the dino and the obstacle ( in case of bird )
                 """
-                output = neural_net[i].activate((dino.hitbox.y,
-                                                distance((dino.hitbox.x, dino.hitbox.y),obstacle.hitbox.midtop),
-                                                obstacle.hitbox.y))
+                output = neural_net[i].activate((abs(obstacle.hitbox.midtop[1] - dino.hitbox.midbottom[1]),
+                                                 abs(obstacle.hitbox.midbottom[1] - dino.hitbox.midtop[1]),
+                                                 abs(obstacle.hitbox.x - dino.hitbox.x)))
 
                 if output[0] > 0.5 and dino.hitbox.y == dino.Y:
                     dino.is_jumping = True
                     dino.is_running = False
                     dino.is_ducking = False
-                elif output[0] < 0.5 and not dino.is_jumping :
+                elif output[1] < 0.5 and not dino.is_jumping:
                     dino.is_ducking = True
                     dino.is_jumping = False
                     dino.is_running = False
-
 
         bg.update(speed)
         bg.draw(SCREEN)
@@ -197,7 +191,7 @@ def eval(ge,conf):
 
 ############### NEAT CONFIG ###########################
 
-def run(config_txt):   # Setup neat
+def run(config_txt):  # Setup neat
     global dinosaurs
     config = neat.config.Config(
         neat.DefaultGenome,
@@ -208,10 +202,9 @@ def run(config_txt):   # Setup neat
     )
 
     dinosaurs = neat.Population(config)
-    dinosaurs.run(eval,50)
-
+    dinosaurs.run(eval, 50)
 
 
 if __name__ == '__main__':
-    config = os.path.join(os.getcwd(),'conf.txt')
+    config = os.path.join(os.getcwd(), 'conf.txt')
     run(config)
