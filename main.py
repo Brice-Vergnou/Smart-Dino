@@ -36,7 +36,7 @@ def update_obstacle(type_of_obstacle, obstacle):
 
 
 def create_obstacle(type_of_obstacle, obstacle):
-    if obstacle.X <= randint(100, 340):  # When the bird is near the border , but at a random place , another appears
+    if obstacle.X <= randint(200, 300):  # When the bird is near the border , but at a random place , another appears
 
         list_old_types.append(type_of_obstacle)
         list_types.remove(type_of_obstacle)
@@ -59,10 +59,12 @@ def statistics():
     text_1 = FONT.render(f'Dinosaurs Alive:  {str(len(dinos))}', True, (0, 0, 0))
     text_2 = FONT.render(f'Generation:  {dinosaurs.generation + 1}', True, (0, 0, 0))
     text_3 = FONT.render(f'Max score:  {max_score}', True, (0, 0, 0))
+    text_4 = FONT.render(f'Speed:  {round(speed,1)}', True, (0, 0, 0))
 
     SCREEN.blit(text_1, (50, 550))
     SCREEN.blit(text_2, (50, 600))
     SCREEN.blit(text_3, (50, 650))
+    SCREEN.blit(text_4, (700, 650))
 
 
 ############ MAIN FUNCTION ###############################
@@ -118,12 +120,14 @@ def eval(ge, conf):
         input = pygame.key.get_pressed()  # Takes inputs
         SCREEN.fill(BACKGROUND)  # We place it here to overwrite the old dino image
 
-        points += 0.3  # Update score
+        points += 0.5  # Update score
+        if math.floor(points) % 4 == 0:  # And also speed when score increases
+            speed += 1/40
         score_text = FONT.render("Points : " + str(math.floor(points)), True,
                                  (0, 0, 0))  # The second argument is antialiasing
         SCREEN.blit(score_text, (1000, 50))
-        if points % 2 == 0:  # And also speed when score increases
-            speed += 0.1
+
+
 
         for dino in dinos:
             dino.update(input)
@@ -162,31 +166,39 @@ def eval(ge, conf):
         for i, dino in enumerate(dinos):
             all_obstacles = list_obstacles + list_old_obstacles
             all_types = list_types + list_old_types
+            nearest_obstacle = all_obstacles[0]
+            nearest_type = all_types[0]
             for j, obstacle in enumerate(all_obstacles):
-                """ The inputs are :
-                        - The y position of the dino
-                        - The distance between the dino and the obstacle
-                        - The y position of the obstacle
-                        - The speed
-                        - The width and the height of the obstacle
-                        - Distance between the bottom of the dino's hitbox height and the obstacle's one
-                """
-                output = neural_net[i].activate((dino.hitbox.y,
-                                                 obstacle.hitbox.y,
-                                                 abs(obstacle.hitbox.x - dino.hitbox.x),
-                                                 speed,
-                                                 obstacle.image.get_height(),
-                                                 obstacle.image.get_width(),
-                                                 abs(obstacle.hitbox.midbottom[1] - dino.hitbox.midbottom[1])))
+                if abs(obstacle.hitbox.x - dino.hitbox.x) < abs(nearest_obstacle.hitbox.x - dino.hitbox.x):
+                    nearest_obstacle = obstacle
+                    nearest_type = all_types[j]
+            """ The inputs are :
+                    - The y position of the dino
+                    - The distance between the dino and the obstacle
+                    - The y position of the obstacle
+                    - The speed
+                    - The width and the height of the obstacle
+                    - Distance between the bottom of the dino's hitbox height and the obstacle's one
+                    - The type of obstacle ( 0 = Bird , 1 = Cactus )
+                NOTE : The mentionned obstacle is always the nearest
+            """
+            output = neural_net[i].activate((dino.hitbox.y,
+                                             nearest_obstacle.hitbox.y,
+                                             abs(nearest_obstacle.hitbox.x - dino.hitbox.x),
+                                             speed,
+                                             nearest_obstacle.image.get_height(),
+                                             nearest_obstacle.image.get_width(),
+                                             abs(nearest_obstacle.hitbox.midbottom[1] - dino.hitbox.midbottom[1]),
+                                             nearest_type))
 
-                if output[0] > 0.5 and dino.hitbox.y == dino.Y:
-                    dino.is_jumping = True
-                    dino.is_running = False
-                    dino.is_ducking = False
-                if output[1] > 0.5 and not dino.is_jumping:
-                    dino.is_ducking = True
-                    dino.is_jumping = False
-                    dino.is_running = False
+            if output[0] > 0.5 and dino.hitbox.y == dino.Y:
+                dino.is_jumping = True
+                dino.is_running = False
+                dino.is_ducking = False
+            if output[1] > 0.5 and not dino.is_jumping:
+                dino.is_ducking = True
+                dino.is_jumping = False
+                dino.is_running = False
 
         bg.update(speed)
         bg.draw(SCREEN)
@@ -209,7 +221,7 @@ def run(config_txt):  # Setup neat
     )
 
     dinosaurs = neat.Population(config)
-    dinosaurs.run(eval, 50)
+    dinosaurs.run(eval, 100)
 
 
 if __name__ == '__main__':
