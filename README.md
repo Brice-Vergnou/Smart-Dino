@@ -60,3 +60,5 @@ As I don't have a lot of compute power , I didn't use any hidden layer , so ther
 ## The results
 
 ![Video results](https://raw.githubusercontent.com/Brice-Vergnou/Smart-Dino-NEAT/master/img/dino_on_drugs.gif)
+
+Even though the algorithm sometimes struggle to evolve ( the dinosaurs sometimes keep ducking or jumping but it's still rare ). , I'm pretty satisfied as a first NEAT project :)
