@@ -73,8 +73,8 @@ class Dinosaur:
     def jump(self):
         self.image = self.jump_img
         if self.is_jumping:
-            self.actual_y -= self.jumping_speed * 30
-            self.jumping_speed -= 0.075
+            self.actual_y -= self.jumping_speed * 25
+            self.jumping_speed -= 0.08
         if self.jumping_speed < - 1:
             self.jumping_speed = 1
             self.is_jumping = False

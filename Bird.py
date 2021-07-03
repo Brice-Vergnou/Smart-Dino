@@ -7,7 +7,7 @@ import os
 BIRDS = [pygame.image.load(os.path.join("img/Bird/Bird1.png")),
          pygame.image.load(os.path.join("img/Bird/Bird2.png"))]
 
-HEIGHT = [360,300,235]
+HEIGHT = [270,300,350]
 
 class Bird(Obstacles):
 
@@ -15,7 +15,7 @@ class Bird(Obstacles):
         self.step = 0
         self.image = BIRDS[self.step]
         self.animation_stage = 0
-        self.Y = HEIGHT[randint(0,2)] # Either low , high , or very high bird
+        self.Y = HEIGHT[randint(0,2)] # Either low , high  bird or very high
         super().__init__()
 
 
