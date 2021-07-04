@@ -18,9 +18,7 @@ Then you just have to run main.py in the Scripts folder. Make sure you have Pyth
 
 ## The game
 
-It's object oriented. If you look into the Scripts folder , each entity has its own script. The [Tech with Tim's video](https://youtu.be/jO6qQDNa2UY) and the [pygame documentation](https://www.pygame.org/docs/) helped me to deal with it.
-
-I tried to use the same velocity as the original game , but you can still tell the difference.
+It's a tweaked version of [my version of the game](https://github.com/Brice-Vergnou/chrome-dinosaur) suited to the needs of the algorithm
 
 ## The A.I.
 
