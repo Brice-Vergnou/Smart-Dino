@@ -49,18 +49,6 @@ class Dinosaur:
         if self.step >= 8:
             self.step = 0
 
-        if input[K_UP]:  # The dino is jumping if we press the up key
-            self.is_jumping = True
-            self.is_ducking = False
-            self.is_running = False
-        elif input[K_DOWN] and not self.is_jumping: # The dino is ducking if we press the down key and we're not jumping
-            self.is_jumping = False
-            self.is_ducking = True
-            self.is_running = False
-        elif not (input[K_DOWN] or self.is_jumping):  # The dino is running if we don't press down and he's not jumping
-            self.is_jumping = False
-            self.is_ducking = False
-            self.is_running = True
 
     def run(self):
         self.image = self.run_img[self.step // 4]  # Switch between running images to animate the dino
