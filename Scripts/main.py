@@ -120,7 +120,6 @@ def eval(ge, conf):
                 pygame.quit()
                 sys.exit()
 
-        input = pygame.key.get_pressed()  # Takes inputs
         SCREEN.fill(BACKGROUND)  # We place it here to overwrite the old dino image
 
         ##### UPDATE SCORE ########
