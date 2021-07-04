@@ -71,6 +71,7 @@ def statistics():
 
 
 def eval(ge, conf):
+
     ######  INIT GAME  ###########
     global speed, SCREEN, list_obstacles, list_types, list_old_types, list_old_obstacles, genomes, neural_net, dinos , max_score
     RUNNING = True
@@ -83,6 +84,7 @@ def eval(ge, conf):
     pygame.display.flip()
     speed = 20
 
+
     ##################### CREATE LISTS ########################
     list_types = []
     list_types.append(type_of_obstacle)
@@ -93,7 +95,7 @@ def eval(ge, conf):
     neural_net = []
     dinos = []
 
-    # Add dinos
+    ########## ADD DINOS ###################
     for i, genome_tuple in enumerate(ge):
         genome = genome_tuple[1]
         dinos.append(Dinosaur())
@@ -101,18 +103,19 @@ def eval(ge, conf):
         neural_net.append(neat.nn.FeedForwardNetwork.create(genome, conf))
         genome.fitness = 0
 
-    # Add obstacle
+    ######## ADD OBSTACLES #########
     if type_of_obstacle:
         list_obstacles.append(Cactus())
     else:
         list_obstacles.append(Bird())
 
+    ########### MAIN LOOP ################
     while RUNNING:
         if len(dinos) == 0:
-            if points > max_score:
+            if points > max_score:  # Update the max score
                 max_score = math.floor(points)
             break
-        for event in pygame.event.get():  # This loops allows the player to quit
+        for event in pygame.event.get():    # Allow the user to quit
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -120,7 +123,8 @@ def eval(ge, conf):
         input = pygame.key.get_pressed()  # Takes inputs
         SCREEN.fill(BACKGROUND)  # We place it here to overwrite the old dino image
 
-        points += 0.5  # Update score
+        ##### UPDATE SCORE ########
+        points += 0.5
         if math.floor(points) % 4 == 0:  # And also speed when score increases
             speed += 1/40
         score_text = FONT.render("Points : " + str(math.floor(points)), True,
@@ -128,12 +132,12 @@ def eval(ge, conf):
         SCREEN.blit(score_text, (1000, 50))
 
 
-
+        ##### UPDATE DINO IMAGE ###########
         for dino in dinos:
             dino.update(input)
             dino.draw_image(SCREEN, list_obstacles)
 
-        # To update the obstacle and maybe change it
+        ########## UPDATE OBSTACLES ##########
         for i in range(len(list_obstacles)):
             update_obstacle(list_types[i], list_obstacles[i])
             create_obstacle(list_types[i], list_obstacles[i])
@@ -158,11 +162,8 @@ def eval(ge, conf):
                 else:
                     genomes[j].fitness += 0.5
 
-        cloud.update(speed)
-        cloud.draw(SCREEN)
-        if cloud.X <= -100:  # When the cloud is gone , another appears
-            cloud = Cloud()
 
+        ########### FEED THE NEURAL NETWORKS WITH INPUT AND ACT DEPENDING ON THE OUTPUT #################
         for i, dino in enumerate(dinos):
             all_obstacles = list_obstacles + list_old_obstacles
             all_types = list_types + list_old_types
@@ -200,9 +201,14 @@ def eval(ge, conf):
                 dino.is_jumping = False
                 dino.is_running = False
 
+
+        ########### UPDATE THE VISUALS #############
+        cloud.update(speed)
+        cloud.draw(SCREEN)
+        if cloud.X <= -100:  # When the cloud is gone , another appears
+            cloud = Cloud()
         bg.update(speed)
         bg.draw(SCREEN)
-
         statistics()
         CLOCK.tick(30)  # Refreshing
         pygame.display.update()
